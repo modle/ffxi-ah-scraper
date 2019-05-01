@@ -12,6 +12,7 @@ def scrape(user):
     browser = webdriver.Firefox(options=options)
     browser.get(url)
     source = browser.page_source
+    browser.close()
 
     soup = BeautifulSoup(source, features="html.parser")
 
@@ -33,7 +34,18 @@ def scrape(user):
             if o and 'Price History' in o[0]:
                 start_index = i
                 break
-        print (output[start_index+2:start_index+12])
+
+        file_path = "output/{}".format(user)
+        f = open(file_path, "r")
+        old_contents = f.read()
+
+        new_contents = output[start_index+2:start_index+12]
+        new_joined = []
+        for entry in new_contents:
+            new_joined.append(", ".join(entry))
+        
+        f = open(file_path, "w+")
+        f.write(str(new_joined))
         break
 
 for user in users:
