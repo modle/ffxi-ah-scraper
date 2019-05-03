@@ -32,7 +32,12 @@ def get_soup(user):
 
 def parse_sales(soup, user):
     sales_data = soup.find_all(id='player-sales')
-    table = soup.find_all('table')[0]
+
+    try:
+        table = soup.find_all('table')[0]
+    except:
+        # no sales history
+        return []
 
     diff_count = 0
 
@@ -45,7 +50,6 @@ def parse_sales(soup, user):
         cols = [ele.text.strip() for ele in cols]
         output.append([ele for ele in cols if ele])
 
-    print (output[0])
     if user not in output[0][0]:
         print ("no data for user {}".format(user))
 
@@ -71,6 +75,8 @@ def get_previous(file_path):
 
 
 def write_new(contents, file_path):
+    if not contents:
+        return
     f = open(file_path, "w+")
     f.write(str(contents))
 
