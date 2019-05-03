@@ -10,16 +10,16 @@ def get_users():
     return users
 
 
-def scrape(user):
+def scrape():
     file_path = "output/{}".format(user)
-    soup = get_soup(user)
-    current_sales = parse_sales(soup, user)
+    soup = get_soup()
+    current_sales = parse_sales(soup)
     old_sales = get_previous(file_path)
     write_new(current_sales, file_path)
     do_diff(old_sales, current_sales)
 
 
-def get_soup(user):
+def get_soup():
     url = 'https://www.ffxiah.com/player/Asura/{}'.format(user)
     options = Options()
     options.headless = True
@@ -30,7 +30,7 @@ def get_soup(user):
     return BeautifulSoup(source, features="html.parser")
 
 
-def parse_sales(soup, user):
+def parse_sales(soup):
     sales_data = soup.find_all(id='player-sales')
 
     try:
@@ -89,7 +89,8 @@ def do_diff(old, new):
 
 if __name__ == "__main__":
     users = get_users()
+    # threading is weird; this makes user available for all of the thread
     for user in users:
-        scrape_thread = threading.Thread(target=scrape, args=(user,))
+        scrape_thread = threading.Thread(target=scrape)
         scrape_thread.start()
         scrape_thread.join()
