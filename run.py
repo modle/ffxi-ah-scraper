@@ -1,17 +1,26 @@
 import ast
+import datetime
+import os
+import syslog
 import threading
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options  
 
+syslog.syslog('scrape started')
+
+script_path = os.getenv('SCRIPT_PATH')
+
+syslog.syslog('path is {}'.format(script_path))
+
 def get_users():
-    f = open("users.txt", "r")
+    f = open("{}/users.txt".format(script_path), "r")
     users = f.read().split("\n")
     return users
 
 
 def scrape():
-    file_path = "output/{}".format(user)
+    file_path = "{}/output/{}".format(script_path, user)
     soup = get_soup()
     current_sales = parse_sales(soup)
     old_sales = get_previous(file_path)
@@ -62,7 +71,13 @@ def parse_sales(soup):
     new_contents = output[start_index+2:start_index+12]
     new_joined = []
     for entry in new_contents:
-        new_joined.append(", ".join(entry))
+        stringified = ", ".join(entry)
+        if 'Screenshots' in stringified:
+            break
+        if entry[2] != user:
+            continue
+        sold_item = "{} - {}".format(entry[0], entry[4])
+        new_joined.append(sold_item)
     return new_joined
 
 
@@ -85,7 +100,17 @@ def do_diff(old, new):
     list_diff = [i for i in old + new if i not in old]
     if list_diff:
         print ("{} new sales:\ncount: {}\n{}".format(user, len(list_diff), list_diff))
+    write_diff(list_diff)
 
+
+def write_diff(diff):
+    if not diff:
+        return
+    time = datetime.datetime.now()
+    f = open("{}/diff".format(script_path), "a+")
+    f.write("\n{} : ".format(time))
+    f.write(str(diff))
+    
 
 if __name__ == "__main__":
     users = get_users()
