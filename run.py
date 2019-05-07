@@ -76,7 +76,7 @@ def parse_sales(soup):
             break
         if entry[2] != user:
             continue
-        sold_item = "{} - {}".format(entry[0], entry[4])
+        sold_item = "{} - {} : {}/{}".format(entry[0], entry[4], entry[1], entry[3])
         new_joined.append(sold_item)
     return new_joined
 
@@ -106,9 +106,9 @@ def do_diff(old, new):
 def write_diff(diff):
     if not diff:
         return
-    time = datetime.datetime.now()
+    current_time = datetime.datetime.now()
     f = open("{}/diff".format(script_path), "a+")
-    f.write("\n{} : ".format(time))
+    f.write("\n{} - {} : ".format(current_time, user))
     f.write(str(diff))
     
 
